@@ -1,21 +1,29 @@
 var PRICE = 9.99;
-
+var LOAD_NUM = 10;
 new Vue({
     el: "#app",
     data: {
         total: 0,
-        items: [
-            { id: 1, title: 'Item1' },
-            { id: 2, title: 'Item2' },
-            { id: 3, title: 'Item3' },
-            { id: 4, title: 'Item4' }
-        ],
+        items: [],
+        results: [],
         cart: [],
-        search: ''
+        newSearch: 'design',
+        lastSearch: '',
+        resHide: false
     },
     methods: {
         onSubmit: function() {
-            
+            this.resHide = true;
+            this.items = [];
+            this.$http
+            .get('/search/'.concat(this.newSearch))
+            .then( function(res) {
+                this.resHide = false;
+                this.results = res.data;
+                this.items = res.data.slice(0, LOAD_NUM);
+                this.lastSearch = this.newSearch;
+
+            })
         },
         addItem: function (index) {
             this.total += PRICE;
@@ -58,5 +66,8 @@ new Vue({
         price: function(price) {
             return price.toFixed(2);
         }
+    },
+    mounted: function() {
+        this.onSubmit();
     }
 });
