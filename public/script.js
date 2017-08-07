@@ -9,7 +9,8 @@ new Vue({
         cart: [],
         newSearch: 'design',
         lastSearch: '',
-        resHide: false
+        resHide: false,
+        multiplier: 1
     },
     methods: {
         onSubmit: function() {
@@ -20,7 +21,7 @@ new Vue({
             .then( function(res) {
                 this.resHide = false;
                 this.results = res.data;
-                this.items = res.data.slice(0, LOAD_NUM);
+                this.appendItems();
                 this.lastSearch = this.newSearch;
 
             })
@@ -60,6 +61,12 @@ new Vue({
                     }
                 }
             }
+        },
+        appendItems: function() {
+            if (this.items.length < this.results.length) {
+                var append = this.results.slice(this.items.length, this.items.length + LOAD_NUM);        
+                this.items = this.items.concat(append);        
+            }
         }
     },
     filters: {
@@ -69,5 +76,13 @@ new Vue({
     },
     mounted: function() {
         this.onSubmit();
+
+        var vueInstance = this;
+        var elem = document.getElementById('product-list-bottom');
+        var watcher = scrollMonitor.create(elem);
+        watcher.enterViewport( function() {
+            vueInstance.appendItems();    
+        })
     }
 });
+
